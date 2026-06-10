@@ -1,0 +1,217 @@
+{% extends "base.html" %}
+{% block title %}Mijozlar — Daftar.uz{% endblock %}
+
+{% block content %}
+<div class="mb-8 flex items-center justify-between">
+    <div>
+        <h1 class="text-2xl font-bold text-gray-800">Mijozlar bazasi</h1>
+        <p class="text-gray-500 text-sm mt-1">Jami {{ debtors|length }} ta mijoz</p>
+    </div>
+    <a href="{{ url_for('owner.add_debtor') }}"
+       class="bg-blue-600 hover:bg-blue-700 text-white px-5 py-2.5 rounded-xl text-sm font-medium transition flex items-center gap-2">
+        <i class="fas fa-plus"></i> Yangi mijoz
+    </a>
+</div>
+
+<!-- Qidiruv va filtrlar -->
+<div class="bg-white rounded-2xl shadow-sm p-5 mb-6">
+    <div class="flex gap-4 items-center">
+        <!-- Qidiruv -->
+        <div class="flex-1 relative">
+            <i class="fas fa-search absolute left-4 top-3.5 text-gray-400"></i>
+            <input type="text" id="searchInput"
+                   placeholder="Ism yoki telefon raqam bo'yicha qidiring..."
+                   value="{{ search }}"
+                   class="w-full pl-11 pr-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm">
+        </div>
+
+        <!-- Filtrlar -->
+        <div class="flex gap-2">
+            <a href="{{ url_for('owner.debtors', filter='all') }}"
+               class="px-4 py-2.5 rounded-xl text-sm font-medium transition
+               {% if filter_type == 'all' %}bg-blue-600 text-white{% else %}bg-gray-100 text-gray-600 hover:bg-gray-200{% endif %}">
+                Barchasi
+            </a>
+            <a href="{{ url_for('owner.debtors', filter='danger') }}"
+               class="px-4 py-2.5 rounded-xl text-sm font-medium transition
+               {% if filter_type == 'danger' %}bg-red-500 text-white{% else %}bg-gray-100 text-gray-600 hover:bg-gray-200{% endif %}">
+                <i class="fas fa-exclamation-triangle mr-1"></i> Xavfli
+            </a>
+            <a href="{{ url_for('owner.debtors', filter='frozen') }}"
+               class="px-4 py-2.5 rounded-xl text-sm font-medium transition
+               {% if filter_type == 'frozen' %}bg-cyan-500 text-white{% else %}bg-gray-100 text-gray-600 hover:bg-gray-200{% endif %}">
+                <i class="fas fa-snowflake mr-1"></i> Muzlatilgan
+            </a>
+            <a href="{{ url_for('owner.debtors', filter='good') }}"
+               class="px-4 py-2.5 rounded-xl text-sm font-medium transition
+               {% if filter_type == 'good' %}bg-green-500 text-white{% else %}bg-gray-100 text-gray-600 hover:bg-gray-200{% endif %}">
+                <i class="fas fa-star mr-1"></i> Ishonchli
+            </a>
+        </div>
+    </div>
+</div>
+
+<!-- Live qidiruv natijalari -->
+<div id="searchResults" class="hidden bg-white rounded-2xl shadow-lg mb-4 overflow-hidden border border-blue-100"></div>
+
+<!-- Mijozlar jadvali -->
+<div class="bg-white rounded-2xl shadow-sm">
+    {% if debtors %}
+    <div class="divide-y divide-gray-50">
+        {% for debtor in debtors %}
+        <div class="p-5 flex items-center justify-between hover:bg-gray-50 transition">
+            <div class="flex items-center gap-4">
+                <!-- Avatar -->
+                {% if debtor.avatar %}
+                <img src="{{ url_for('static', filename='uploads/' + debtor.avatar) }}"
+                     class="w-12 h-12 rounded-full object-cover border-2 border-gray-100">
+                {% else %}
+                <div class="w-12 h-12 rounded-full bg-gradient-to-br from-blue-400 to-blue-600
+                            flex items-center justify-center text-white font-bold">
+                    {{ debtor.full_name[:2].upper() }}
+                </div>
+                {% endif %}
+
+                <div>
+                    <div class="flex items-center gap-2">
+                        <p class="font-semibold text-gray-800">{{ debtor.full_name }}</p>
+                        <!-- Trust score -->
+                        {% if debtor.trust_score == 'good' %}
+                        <span class="text-xs bg-green-100 text-green-600 px-2 py-0.5 rounded-full">
+                            🟢 Ishonchli
+                        </span>
+                        {% elif debtor.trust_score == 'medium' %}
+                        <span class="text-xs bg-yellow-100 text-yellow-600 px-2 py-0.5 rounded-full">
+                            🟡 Kechiktiradi
+                        </span>
+                        {% elif debtor.trust_score == 'bad' %}
+                        <span class="text-xs bg-red-100 text-red-600 px-2 py-0.5 rounded-full">
+                            🔴 Xavfli
+                        </span>
+                        {% endif %}
+                        {% if debtor.is_frozen %}
+                        <span class="text-xs bg-cyan-100 text-cyan-600 px-2 py-0.5 rounded-full">
+                            ❄️ Muzlatilgan
+                        </span>
+                        {% endif %}
+                    </div>
+                    <p class="text-gray-400 text-sm">
+                        <i class="fas fa-phone mr-1"></i>{{ debtor.phone }}
+                    </p>
+                    <p class="text-gray-400 text-xs mt-0.5">
+                        <i class="fas fa-calendar mr-1"></i>
+                        {{ debtor.created_at.strftime('%d.%m.%Y') }}
+                    </p>
+                </div>
+            </div>
+
+            <div class="flex items-center gap-6">
+                <!-- Qarz miqdori va limit -->
+                <div class="text-right">
+                    <p class="font-bold text-red-500">
+                        {{ "{:,.0f}".format(debtor.total_debt) }} so'm
+                    </p>
+                    <p class="text-gray-400 text-xs">
+                        Limit: {{ "{:,.0f}".format(debtor.debt_limit) }} so'm
+                    </p>
+                    <!-- Progress bar -->
+                    <div class="w-32 h-1.5 bg-gray-100 rounded-full mt-1">
+                        {% set percent = (debtor.total_debt / debtor.debt_limit * 100)|int %}
+                        <div class="h-1.5 rounded-full
+                            {% if percent > 80 %}bg-red-500
+                            {% elif percent > 50 %}bg-yellow-400
+                            {% else %}bg-green-400{% endif %}"
+                            style="width: {{ [percent, 100]|min }}%">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Havolalar -->
+                <a href="{{ url_for('owner.debtor_profile', debtor_id=debtor.id) }}"
+                   class="bg-blue-50 hover:bg-blue-100 text-blue-600 px-4 py-2 rounded-xl text-sm transition">
+                    <i class="fas fa-eye mr-1"></i> Ko'rish
+                </a>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    {% else %}
+    <div class="p-16 text-center">
+        <div class="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+            <i class="fas fa-users text-gray-400 text-2xl"></i>
+        </div>
+        <p class="text-gray-500 font-medium">
+            {% if search %}
+                "{{ search }}" bo'yicha hech narsa topilmadi
+            {% else %}
+                Hozircha mijozlar yo'q
+            {% endif %}
+        </p>
+        {% if not search %}
+        <a href="{{ url_for('owner.add_debtor') }}"
+           class="inline-block mt-4 bg-blue-600 text-white px-5 py-2 rounded-xl text-sm">
+            <i class="fas fa-plus mr-2"></i> Mijoz qo'shish
+        </a>
+        {% endif %}
+    </div>
+    {% endif %}
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+const searchInput = document.getElementById('searchInput');
+const searchResults = document.getElementById('searchResults');
+
+let timer;
+searchInput.addEventListener('input', function() {
+    clearTimeout(timer);
+    const q = this.value.trim();
+
+    if (q.length < 2) {
+        searchResults.classList.add('hidden');
+        searchResults.innerHTML = '';
+        return;
+    }
+
+    timer = setTimeout(() => {
+        fetch(`{{ url_for('owner.search') }}?q=${encodeURIComponent(q)}`)
+            .then(r => r.json())
+            .then(data => {
+                if (data.length === 0) {
+                    searchResults.classList.add('hidden');
+                    return;
+                }
+                searchResults.classList.remove('hidden');
+                searchResults.innerHTML = data.map(d => `
+                    <a href="/owner/debtors/${d.id}"
+                       class="flex items-center justify-between p-4 hover:bg-blue-50 transition border-b border-gray-50">
+                        <div class="flex items-center gap-3">
+                            <div class="w-9 h-9 rounded-full bg-blue-100 flex items-center
+                                        justify-center text-blue-600 font-bold text-sm">
+                                ${d.full_name.substring(0,2).toUpperCase()}
+                            </div>
+                            <div>
+                                <p class="font-medium text-gray-800 text-sm">${d.full_name}</p>
+                                <p class="text-gray-400 text-xs">${d.phone}</p>
+                            </div>
+                        </div>
+                        <div class="text-right">
+                            <p class="font-bold text-red-500 text-sm">
+                                ${Number(d.total_debt).toLocaleString()} so'm
+                            </p>
+                            ${d.is_frozen ? '<span class="text-xs text-cyan-500">❄️ Muzlatilgan</span>' : ''}
+                        </div>
+                    </a>
+                `).join('');
+            });
+    }, 300);
+});
+
+document.addEventListener('click', function(e) {
+    if (!searchResults.contains(e.target) && e.target !== searchInput) {
+        searchResults.classList.add('hidden');
+    }
+});
+</script>
+{% endblock %}

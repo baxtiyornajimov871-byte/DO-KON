@@ -1,0 +1,209 @@
+{% extends "base.html" %}
+{% block title %}Dashboard — {{ shop.name }}{% endblock %}
+
+{% block content %}
+<div class="mb-8 flex items-center justify-between">
+    <div>
+        <h1 class="text-2xl font-bold text-gray-800">{{ shop.name }}</h1>
+        <p class="text-gray-500 text-sm mt-1">Xush kelibsiz, {{ current_user.full_name }}!</p>
+    </div>
+    <a href="{{ url_for('owner.add_debtor') }}"
+       class="bg-blue-600 hover:bg-blue-700 text-white px-5 py-2.5 rounded-xl text-sm font-medium transition flex items-center gap-2">
+        <i class="fas fa-plus"></i> Yangi mijoz
+    </a>
+</div>
+
+<!-- Statistika -->
+<div class="grid grid-cols-4 gap-6 mb-8">
+    <div class="bg-white rounded-2xl p-6 shadow-sm card-hover">
+        <div class="flex items-center justify-between">
+            <div>
+                <p class="text-gray-500 text-sm">Jami qarz</p>
+                <p class="text-2xl font-bold text-gray-800 mt-1">
+                    {{ "{:,.0f}".format(total_debt) }}
+                </p>
+                <p class="text-gray-400 text-xs mt-0.5">so'm</p>
+            </div>
+            <div class="w-12 h-12 bg-red-100 rounded-xl flex items-center justify-center">
+                <i class="fas fa-money-bill-wave text-red-500 text-xl"></i>
+            </div>
+        </div>
+    </div>
+
+    <div class="bg-white rounded-2xl p-6 shadow-sm card-hover">
+        <div class="flex items-center justify-between">
+            <div>
+                <p class="text-gray-500 text-sm">Jami mijozlar</p>
+                <p class="text-2xl font-bold text-gray-800 mt-1">{{ debtors|length }}</p>
+                <p class="text-gray-400 text-xs mt-0.5">ta</p>
+            </div>
+            <div class="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center">
+                <i class="fas fa-users text-blue-500 text-xl"></i>
+            </div>
+        </div>
+    </div>
+
+    <div class="bg-white rounded-2xl p-6 shadow-sm card-hover">
+        <div class="flex items-center justify-between">
+            <div>
+                <p class="text-gray-500 text-sm">Bugun berildi</p>
+                <p class="text-2xl font-bold text-red-500 mt-1">
+                    {{ "{:,.0f}".format(today_added) }}
+                </p>
+                <p class="text-gray-400 text-xs mt-0.5">so'm</p>
+            </div>
+            <div class="w-12 h-12 bg-orange-100 rounded-xl flex items-center justify-center">
+                <i class="fas fa-arrow-up text-orange-500 text-xl"></i>
+            </div>
+        </div>
+    </div>
+
+    <div class="bg-white rounded-2xl p-6 shadow-sm card-hover">
+        <div class="flex items-center justify-between">
+            <div>
+                <p class="text-gray-500 text-sm">Bugun undirildi</p>
+                <p class="text-2xl font-bold text-green-500 mt-1">
+                    {{ "{:,.0f}".format(today_paid) }}
+                </p>
+                <p class="text-gray-400 text-xs mt-0.5">so'm</p>
+            </div>
+            <div class="w-12 h-12 bg-green-100 rounded-xl flex items-center justify-center">
+                <i class="fas fa-arrow-down text-green-500 text-xl"></i>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="grid grid-cols-3 gap-6">
+    <!-- Mijozlar ro'yxati -->
+    <div class="col-span-2 bg-white rounded-2xl shadow-sm">
+        <div class="p-6 border-b border-gray-100 flex items-center justify-between">
+            <h2 class="font-semibold text-gray-800">
+                <i class="fas fa-users mr-2 text-blue-500"></i>
+                Eng ko'p qarzdorlar
+            </h2>
+            <a href="{{ url_for('owner.debtors') }}"
+               class="text-blue-600 text-sm hover:underline">
+                Barchasi <i class="fas fa-arrow-right ml-1"></i>
+            </a>
+        </div>
+
+        {% if debtors %}
+        <div class="divide-y divide-gray-50">
+            {% for debtor in debtors[:8] %}
+            <div class="p-5 flex items-center justify-between hover:bg-gray-50 transition">
+                <div class="flex items-center gap-3">
+                    <!-- Avatar -->
+                    {% if debtor.avatar %}
+                    <img src="{{ url_for('static', filename='uploads/' + debtor.avatar) }}"
+                         class="w-10 h-10 rounded-full object-cover">
+                    {% else %}
+                    <div class="w-10 h-10 rounded-full bg-gradient-to-br from-blue-400 to-blue-600
+                                flex items-center justify-center text-white font-bold text-sm">
+                        {{ debtor.full_name[:2].upper() }}
+                    </div>
+                    {% endif %}
+                    <div>
+                        <p class="font-medium text-gray-800 text-sm">{{ debtor.full_name }}</p>
+                        <p class="text-gray-400 text-xs">{{ debtor.phone }}</p>
+                    </div>
+                </div>
+                <div class="flex items-center gap-3">
+                    {% if debtor.is_frozen %}
+                    <span class="bg-cyan-100 text-cyan-600 text-xs px-2 py-1 rounded-full">
+                        <i class="fas fa-snowflake mr-1"></i>Muzlatilgan
+                    </span>
+                    {% endif %}
+                    <div class="text-right">
+                        <p class="font-bold text-red-500 text-sm">
+                            {{ "{:,.0f}".format(debtor.total_debt) }} so'm
+                        </p>
+                        <div class="w-24 h-1.5 bg-gray-100 rounded-full mt-1">
+                            <div class="h-1.5 rounded-full
+                                {% if debtor.total_debt / debtor.debt_limit > 0.8 %}bg-red-500
+                                {% elif debtor.total_debt / debtor.debt_limit > 0.5 %}bg-yellow-400
+                                {% else %}bg-green-400{% endif %}"
+                                style="width: {{ [[(debtor.total_debt / debtor.debt_limit * 100)|int, 0]|max, 100]|min }}%">
+                            </div>
+                        </div>
+                    </div>
+                    <a href="{{ url_for('owner.debtor_profile', debtor_id=debtor.id) }}"
+                       class="text-gray-400 hover:text-blue-600 transition">
+                        <i class="fas fa-chevron-right"></i>
+                    </a>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
+        <div class="p-16 text-center">
+            <div class="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                <i class="fas fa-users text-gray-400 text-2xl"></i>
+            </div>
+            <p class="text-gray-500 font-medium">Hozircha mijozlar yo'q</p>
+            <a href="{{ url_for('owner.add_debtor') }}"
+               class="inline-block mt-4 bg-blue-600 text-white px-5 py-2 rounded-xl text-sm">
+                <i class="fas fa-plus mr-2"></i> Mijoz qo'shish
+            </a>
+        </div>
+        {% endif %}
+    </div>
+
+    <!-- O'ng panel -->
+    <div class="space-y-6">
+        <!-- Muzlatilgan -->
+        <div class="bg-white rounded-2xl shadow-sm p-6">
+            <h3 class="font-semibold text-gray-800 mb-4">
+                <i class="fas fa-snowflake mr-2 text-cyan-500"></i>
+                Muzlatilgan
+            </h3>
+            <div class="text-center">
+                <p class="text-4xl font-bold text-cyan-500">{{ frozen_count }}</p>
+                <p class="text-gray-500 text-sm mt-1">ta mijoz muzlatilgan</p>
+            </div>
+        </div>
+
+        <!-- Xavfli qarzdorlar -->
+        {% if danger_debtors %}
+        <div class="bg-white rounded-2xl shadow-sm p-6">
+            <h3 class="font-semibold text-gray-800 mb-4">
+                <i class="fas fa-exclamation-triangle mr-2 text-red-500"></i>
+                Limit yaqinlashgan
+            </h3>
+            <div class="space-y-3">
+                {% for d in danger_debtors[:4] %}
+                <div class="flex items-center justify-between">
+                    <span class="text-sm text-gray-700">{{ d.full_name }}</span>
+                    <span class="text-xs text-red-500 font-medium">
+                        {{ "{:,.0f}".format(d.total_debt) }}
+                    </span>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- Tezkor havolalar -->
+        <div class="bg-white rounded-2xl shadow-sm p-6">
+            <h3 class="font-semibold text-gray-800 mb-4">
+                <i class="fas fa-bolt mr-2 text-yellow-500"></i>
+                Tezkor havolalar
+            </h3>
+            <div class="space-y-2">
+                <a href="{{ url_for('owner.add_debtor') }}"
+                   class="flex items-center gap-3 p-3 rounded-xl hover:bg-blue-50 transition text-sm text-gray-600 hover:text-blue-600">
+                    <i class="fas fa-user-plus w-4"></i> Mijoz qo'shish
+                </a>
+                <a href="{{ url_for('owner.employees') }}"
+                   class="flex items-center gap-3 p-3 rounded-xl hover:bg-blue-50 transition text-sm text-gray-600 hover:text-blue-600">
+                    <i class="fas fa-user-tie w-4"></i> Ishchilar
+                </a>
+                <a href="{{ url_for('owner.audit_logs') }}"
+                   class="flex items-center gap-3 p-3 rounded-xl hover:bg-blue-50 transition text-sm text-gray-600 hover:text-blue-600">
+                    <i class="fas fa-shield-alt w-4"></i> Audit loglar
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

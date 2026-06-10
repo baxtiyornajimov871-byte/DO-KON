@@ -1,0 +1,72 @@
+{% extends "base.html" %}
+
+{% block auth_content %}
+<div class="min-h-screen bg-gradient-to-br from-red-600 to-red-800 flex items-center justify-center p-4">
+    <div class="w-full max-w-md">
+
+        <!-- Karta -->
+        <div class="bg-white rounded-2xl shadow-2xl p-8 text-center">
+
+            <!-- Icon -->
+            <div class="w-20 h-20 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-6">
+                <i class="fas fa-times-circle text-red-500 text-4xl"></i>
+            </div>
+
+            <h1 class="text-2xl font-bold text-gray-800 mb-2">Ariza rad etildi</h1>
+            <p class="text-gray-500 text-sm mb-6">
+                Hurmatli <strong>{{ current_user.full_name }}</strong>,
+                afsuski <strong>"{{ shop.name }}"</strong> do'koni uchun
+                yuborgan arizangiz rad etildi.
+            </p>
+
+            <!-- Status -->
+            <div class="bg-red-50 border border-red-200 rounded-xl p-4 mb-6">
+                <div class="flex items-center justify-center gap-2 text-red-700">
+                    <i class="fas fa-ban"></i>
+                    <span class="font-medium text-sm">Kirish taqiqlangan</span>
+                </div>
+                <p class="text-red-500 text-xs mt-2">
+                    Qo'shimcha ma'lumot uchun platforma egasi bilan bog'laning.
+                </p>
+            </div>
+
+            <!-- Qadamlar -->
+            <div class="text-left space-y-3 mb-6">
+                <div class="flex items-center gap-3">
+                    <div class="w-7 h-7 bg-green-500 rounded-full flex items-center justify-center flex-shrink-0">
+                        <i class="fas fa-check text-white text-xs"></i>
+                    </div>
+                    <span class="text-sm text-gray-600">Ariza yuborildi</span>
+                </div>
+                <div class="flex items-center gap-3">
+                    <div class="w-7 h-7 bg-green-500 rounded-full flex items-center justify-center flex-shrink-0">
+                        <i class="fas fa-check text-white text-xs"></i>
+                    </div>
+                    <span class="text-sm text-gray-600">Super Admin ko'rib chiqdi</span>
+                </div>
+                <div class="flex items-center gap-3">
+                    <div class="w-7 h-7 bg-red-500 rounded-full flex items-center justify-center flex-shrink-0">
+                        <i class="fas fa-times text-white text-xs"></i>
+                    </div>
+                    <span class="text-sm text-red-600 font-medium">Ariza rad etildi</span>
+                </div>
+            </div>
+
+            <!-- Bog'lanish -->
+            <div class="bg-gray-50 rounded-xl p-4 mb-6">
+                <p class="text-gray-600 text-sm font-medium mb-2">
+                    <i class="fas fa-headset mr-1"></i> Murojaat uchun:
+                </p>
+                <p class="text-gray-500 text-xs">
+                    Sayt administratori bilan bog'laning va arizangizni qayta ko'rib chiqishni so'rang.
+                </p>
+            </div>
+
+            <a href="{{ url_for('auth.logout') }}"
+               class="block w-full text-center bg-red-500 hover:bg-red-600 text-white font-semibold py-3 rounded-xl transition text-sm">
+                <i class="fas fa-sign-out-alt mr-2"></i> Chiqish
+            </a>
+        </div>
+    </div>
+</div>
+{% endblock %}

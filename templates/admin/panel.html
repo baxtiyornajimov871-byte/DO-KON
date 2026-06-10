@@ -1,0 +1,225 @@
+{% extends "base.html" %}
+{% block title %}Super Admin Panel — Daftar.uz{% endblock %}
+
+{% block content %}
+<div class="mb-8">
+    <h1 class="text-2xl font-bold text-gray-800">Super Admin Panel</h1>
+    <p class="text-gray-500 text-sm mt-1">Barcha do'konlarni boshqarish</p>
+</div>
+
+<!-- Statistika -->
+<div class="grid grid-cols-4 gap-6 mb-8">
+    <div class="bg-white rounded-2xl p-6 shadow-sm card-hover">
+        <div class="flex items-center justify-between">
+            <div>
+                <p class="text-gray-500 text-sm">Jami do'konlar</p>
+                <p class="text-3xl font-bold text-gray-800 mt-1">{{ stats.total }}</p>
+            </div>
+            <div class="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center">
+                <i class="fas fa-store text-blue-600 text-xl"></i>
+            </div>
+        </div>
+    </div>
+
+    <div class="bg-white rounded-2xl p-6 shadow-sm card-hover">
+        <div class="flex items-center justify-between">
+            <div>
+                <p class="text-gray-500 text-sm">Kutilmoqda</p>
+                <p class="text-3xl font-bold text-yellow-500 mt-1">{{ stats.pending }}</p>
+            </div>
+            <div class="w-12 h-12 bg-yellow-100 rounded-xl flex items-center justify-center">
+                <i class="fas fa-clock text-yellow-500 text-xl"></i>
+            </div>
+        </div>
+    </div>
+
+    <div class="bg-white rounded-2xl p-6 shadow-sm card-hover">
+        <div class="flex items-center justify-between">
+            <div>
+                <p class="text-gray-500 text-sm">Faol do'konlar</p>
+                <p class="text-3xl font-bold text-green-500 mt-1">{{ stats.active }}</p>
+            </div>
+            <div class="w-12 h-12 bg-green-100 rounded-xl flex items-center justify-center">
+                <i class="fas fa-check-circle text-green-500 text-xl"></i>
+            </div>
+        </div>
+    </div>
+
+    <div class="bg-white rounded-2xl p-6 shadow-sm card-hover">
+        <div class="flex items-center justify-between">
+            <div>
+                <p class="text-gray-500 text-sm">Rad etilgan</p>
+                <p class="text-3xl font-bold text-red-500 mt-1">{{ stats.rejected }}</p>
+            </div>
+            <div class="w-12 h-12 bg-red-100 rounded-xl flex items-center justify-center">
+                <i class="fas fa-times-circle text-red-500 text-xl"></i>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Kutilayotgan arizalar -->
+{% if pending_shops %}
+<div class="bg-white rounded-2xl shadow-sm mb-8">
+    <div class="p-6 border-b border-gray-100 flex items-center justify-between">
+        <div class="flex items-center gap-3">
+            <div class="w-8 h-8 bg-yellow-100 rounded-lg flex items-center justify-center">
+                <i class="fas fa-clock text-yellow-500"></i>
+            </div>
+            <h2 class="font-semibold text-gray-800">Kutilayotgan arizalar</h2>
+            <span class="bg-yellow-100 text-yellow-700 text-xs font-medium px-2 py-1 rounded-full">
+                {{ stats.pending }} ta
+            </span>
+        </div>
+    </div>
+    <div class="divide-y divide-gray-50">
+        {% for shop in pending_shops %}
+        <div class="p-6 flex items-center justify-between hover:bg-gray-50 transition">
+            <div class="flex items-center gap-4">
+                <div class="w-11 h-11 bg-blue-100 rounded-xl flex items-center justify-center font-bold text-blue-600">
+                    {{ shop.name[0].upper() }}
+                </div>
+                <div>
+                    <p class="font-semibold text-gray-800">{{ shop.name }}</p>
+                    <p class="text-gray-500 text-sm">
+                        <i class="fas fa-user mr-1"></i>{{ shop.owner_name }}
+                        <span class="mx-2">•</span>
+                        <i class="fas fa-phone mr-1"></i>{{ shop.phone }}
+                    </p>
+                    <p class="text-gray-400 text-xs mt-1">
+                        <i class="fas fa-calendar mr-1"></i>
+                        {{ shop.created_at.strftime('%d.%m.%Y %H:%M') }}
+                    </p>
+                </div>
+            </div>
+            <div class="flex items-center gap-3">
+                <!-- Tasdiqlash -->
+                <form method="POST" action="{{ url_for('admin.approve_shop', shop_id=shop.id) }}">
+                    <button type="submit"
+                            class="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-xl text-sm font-medium transition flex items-center gap-2">
+                        <i class="fas fa-check"></i> Tasdiqlash
+                    </button>
+                </form>
+                <!-- Rad etish -->
+                <form method="POST" action="{{ url_for('admin.reject_shop', shop_id=shop.id) }}">
+                    <button type="submit"
+                            class="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-xl text-sm font-medium transition flex items-center gap-2">
+                        <i class="fas fa-times"></i> Rad etish
+                    </button>
+                </form>
+                <!-- Tafsilot -->
+                <a href="{{ url_for('admin.shop_detail', shop_id=shop.id) }}"
+                   class="bg-gray-100 hover:bg-gray-200 text-gray-600 px-4 py-2 rounded-xl text-sm font-medium transition">
+                    <i class="fas fa-eye"></i>
+                </a>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% endif %}
+
+<!-- Faol do'konlar -->
+{% if active_shops %}
+<div class="bg-white rounded-2xl shadow-sm mb-8">
+    <div class="p-6 border-b border-gray-100 flex items-center gap-3">
+        <div class="w-8 h-8 bg-green-100 rounded-lg flex items-center justify-center">
+            <i class="fas fa-check-circle text-green-500"></i>
+        </div>
+        <h2 class="font-semibold text-gray-800">Faol do'konlar</h2>
+        <span class="bg-green-100 text-green-700 text-xs font-medium px-2 py-1 rounded-full">
+            {{ stats.active }} ta
+        </span>
+    </div>
+    <div class="divide-y divide-gray-50">
+        {% for shop in active_shops %}
+        <div class="p-6 flex items-center justify-between hover:bg-gray-50 transition">
+            <div class="flex items-center gap-4">
+                <div class="w-11 h-11 bg-green-100 rounded-xl flex items-center justify-center font-bold text-green-600">
+                    {{ shop.name[0].upper() }}
+                </div>
+                <div>
+                    <p class="font-semibold text-gray-800">{{ shop.name }}</p>
+                    <p class="text-gray-500 text-sm">
+                        <i class="fas fa-user mr-1"></i>{{ shop.owner_name }}
+                        <span class="mx-2">•</span>
+                        <i class="fas fa-phone mr-1"></i>{{ shop.phone }}
+                    </p>
+                </div>
+            </div>
+            <div class="flex items-center gap-3">
+                <span class="bg-green-100 text-green-700 text-xs px-3 py-1 rounded-full font-medium">
+                    <i class="fas fa-circle text-xs mr-1"></i> Faol
+                </span>
+                <a href="{{ url_for('admin.shop_detail', shop_id=shop.id) }}"
+                   class="bg-gray-100 hover:bg-gray-200 text-gray-600 px-4 py-2 rounded-xl text-sm transition">
+                    <i class="fas fa-eye mr-1"></i> Ko'rish
+                </a>
+                <form method="POST" action="{{ url_for('admin.delete_shop', shop_id=shop.id) }}"
+                      onsubmit="return confirm('Rostdan ham o\'chirmoqchimisiz?')">
+                    <button type="submit"
+                            class="bg-red-100 hover:bg-red-500 hover:text-white text-red-500 px-4 py-2 rounded-xl text-sm transition">
+                        <i class="fas fa-trash"></i>
+                    </button>
+                </form>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% endif %}
+
+<!-- Rad etilgan do'konlar -->
+{% if rejected_shops %}
+<div class="bg-white rounded-2xl shadow-sm">
+    <div class="p-6 border-b border-gray-100 flex items-center gap-3">
+        <div class="w-8 h-8 bg-red-100 rounded-lg flex items-center justify-center">
+            <i class="fas fa-times-circle text-red-500"></i>
+        </div>
+        <h2 class="font-semibold text-gray-800">Rad etilgan arizalar</h2>
+        <span class="bg-red-100 text-red-700 text-xs font-medium px-2 py-1 rounded-full">
+            {{ stats.rejected }} ta
+        </span>
+    </div>
+    <div class="divide-y divide-gray-50">
+        {% for shop in rejected_shops %}
+        <div class="p-6 flex items-center justify-between hover:bg-gray-50 transition">
+            <div class="flex items-center gap-4">
+                <div class="w-11 h-11 bg-red-100 rounded-xl flex items-center justify-center font-bold text-red-400">
+                    {{ shop.name[0].upper() }}
+                </div>
+                <div>
+                    <p class="font-semibold text-gray-600">{{ shop.name }}</p>
+                    <p class="text-gray-400 text-sm">
+                        <i class="fas fa-user mr-1"></i>{{ shop.owner_name }}
+                        <span class="mx-2">•</span>
+                        <i class="fas fa-phone mr-1"></i>{{ shop.phone }}
+                    </p>
+                </div>
+            </div>
+            <div class="flex items-center gap-3">
+                <span class="bg-red-100 text-red-600 text-xs px-3 py-1 rounded-full font-medium">
+                    Rad etilgan
+                </span>
+                <!-- Qayta tasdiqlash -->
+                <form method="POST" action="{{ url_for('admin.approve_shop', shop_id=shop.id) }}">
+                    <button type="submit"
+                            class="bg-green-100 hover:bg-green-500 hover:text-white text-green-600 px-4 py-2 rounded-xl text-sm transition">
+                        <i class="fas fa-redo mr-1"></i> Qayta tasdiqlash
+                    </button>
+                </form>
+                <form method="POST" action="{{ url_for('admin.delete_shop', shop_id=shop.id) }}"
+                      onsubmit="return confirm('Rostdan ham o\'chirmoqchimisiz?')">
+                    <button type="submit"
+                            class="bg-red-100 hover:bg-red-500 hover:text-white text-red-500 px-4 py-2 rounded-xl text-sm transition">
+                        <i class="fas fa-trash"></i>
+                    </button>
+                </form>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% endif %}
+
+{% endblock %}

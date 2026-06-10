@@ -1,0 +1,80 @@
+{% extends "base.html" %}
+
+{% block auth_content %}
+<div class="min-h-screen bg-gradient-to-br from-yellow-500 to-orange-500 flex items-center justify-center p-4">
+    <div class="w-full max-w-md">
+
+        <!-- Karta -->
+        <div class="bg-white rounded-2xl shadow-2xl p-8 text-center">
+
+            <!-- Animatsiyali icon -->
+            <div class="w-20 h-20 bg-yellow-100 rounded-full flex items-center justify-center mx-auto mb-6">
+                <i class="fas fa-clock text-yellow-500 text-4xl animate-pulse"></i>
+            </div>
+
+            <h1 class="text-2xl font-bold text-gray-800 mb-2">Ariza ko'rib chiqilmoqda</h1>
+            <p class="text-gray-500 text-sm mb-6">
+                Hurmatli <strong>{{ current_user.full_name }}</strong>, 
+                <strong>"{{ shop.name }}"</strong> do'koni uchun yuborgan 
+                arizangiz Super Admin tomonidan ko'rib chiqilmoqda.
+            </p>
+
+            <!-- Status -->
+            <div class="bg-yellow-50 border border-yellow-200 rounded-xl p-4 mb-6">
+                <div class="flex items-center justify-center gap-2 text-yellow-700">
+                    <i class="fas fa-hourglass-half animate-spin"></i>
+                    <span class="font-medium text-sm">Kutilmoqda...</span>
+                </div>
+                <p class="text-yellow-600 text-xs mt-2">
+                    Ariza yuborilgan vaqt: {{ shop.created_at.strftime('%d.%m.%Y %H:%M') }}
+                </p>
+            </div>
+
+            <!-- Qadamlar -->
+            <div class="text-left space-y-3 mb-6">
+                <div class="flex items-center gap-3">
+                    <div class="w-7 h-7 bg-green-500 rounded-full flex items-center justify-center flex-shrink-0">
+                        <i class="fas fa-check text-white text-xs"></i>
+                    </div>
+                    <span class="text-sm text-gray-600">Ariza yuborildi</span>
+                </div>
+                <div class="flex items-center gap-3">
+                    <div class="w-7 h-7 bg-yellow-400 rounded-full flex items-center justify-center flex-shrink-0 animate-pulse">
+                        <i class="fas fa-clock text-white text-xs"></i>
+                    </div>
+                    <span class="text-sm text-gray-600">Super Admin ko'rib chiqmoqda</span>
+                </div>
+                <div class="flex items-center gap-3">
+                    <div class="w-7 h-7 bg-gray-200 rounded-full flex items-center justify-center flex-shrink-0">
+                        <i class="fas fa-unlock text-gray-400 text-xs"></i>
+                    </div>
+                    <span class="text-sm text-gray-400">Do'kon faollashadi</span>
+                </div>
+            </div>
+
+            <!-- Sahifani yangilash -->
+            <button onclick="location.reload()"
+                    class="w-full bg-yellow-500 hover:bg-yellow-600 text-white font-semibold py-3 rounded-xl transition text-sm mb-3">
+                <i class="fas fa-sync-alt mr-2"></i> Holatni tekshirish
+            </button>
+
+            <a href="{{ url_for('auth.logout') }}"
+               class="block w-full text-center text-gray-500 hover:text-gray-700 text-sm py-2">
+                <i class="fas fa-sign-out-alt mr-1"></i> Chiqish
+            </a>
+        </div>
+
+        <!-- Auto refresh -->
+        <p class="text-white text-xs text-center mt-4 opacity-70">
+            Sahifa har 30 soniyada avtomatik yangilanadi
+        </p>
+    </div>
+</div>
+
+<script>
+    // Har 30 soniyada avtomatik yangilash
+    setTimeout(function() {
+        location.reload();
+    }, 30000);
+</script>
+{% endblock %}
