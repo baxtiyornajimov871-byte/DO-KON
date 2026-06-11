@@ -54,8 +54,8 @@ def create_super_admin():
             from werkzeug.security import generate_password_hash
             admin = User(
                 full_name='Super Admin',
-                username=app.config['SUPER_ADMIN_USERNAME'],
-                password_hash=generate_password_hash(app.config['SUPER_ADMIN_PASSWORD']),
+                username='admin',
+                password_hash=generate_password_hash('admin123', method='pbkdf2:sha256'),
                 role='super_admin',
                 shop_id=None
             )
@@ -64,7 +64,7 @@ def create_super_admin():
             print("✅ Super Admin yaratildi!")
         else:
             print("ℹ️ Super Admin allaqachon mavjud.")
-
+            
 # ========================
 # BAZANI YARATISH
 # ========================

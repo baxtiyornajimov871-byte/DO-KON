@@ -1,0 +1,116 @@
+{% extends "base.html" %}
+{% block title %}Ishchilar — Daftar.uz{% endblock %}
+
+{% block content %}
+<div class="mb-8 flex items-center justify-between">
+    <div>
+        <h1 class="text-2xl font-bold text-gray-800">Ishchilar</h1>
+        <p class="text-gray-500 text-sm mt-1">Jami {{ workers|length }} ta ishchi</p>
+    </div>
+    <a href="{{ url_for('owner.add_employee') }}"
+       class="bg-blue-600 hover:bg-blue-700 text-white px-5 py-2.5 rounded-xl text-sm font-medium transition flex items-center gap-2">
+        <i class="fas fa-user-plus"></i> Ishchi qo'shish
+    </a>
+</div>
+
+{% if workers %}
+<div class="grid grid-cols-3 gap-6">
+    {% for worker in workers %}
+    <div class="bg-white rounded-2xl shadow-sm p-6 card-hover">
+        <div class="flex items-center gap-4 mb-4">
+            <div class="w-14 h-14 bg-gradient-to-br from-purple-400 to-purple-600
+                        rounded-full flex items-center justify-center
+                        text-white font-bold text-xl">
+                {{ worker.full_name[0].upper() }}
+            </div>
+            <div>
+                <h3 class="font-semibold text-gray-800">{{ worker.full_name }}</h3>
+                <p class="text-gray-400 text-sm">@{{ worker.username }}</p>
+            </div>
+        </div>
+
+        <div class="space-y-2 mb-4">
+            <div class="flex items-center justify-between text-sm">
+                <span class="text-gray-500">Lavozim:</span>
+                <span class="bg-purple-100 text-purple-700 px-2 py-0.5 rounded-full text-xs font-medium">
+                    Kassir
+                </span>
+            </div>
+            <div class="flex items-center justify-between text-sm">
+                <span class="text-gray-500">Status:</span>
+                <span class="flex items-center gap-1">
+                    <span class="w-2 h-2 rounded-full
+                        {% if worker.is_active %}bg-green-400{% else %}bg-red-400{% endif %}">
+                    </span>
+                    <span class="{% if worker.is_active %}text-green-600{% else %}text-red-600{% endif %} text-xs">
+                        {% if worker.is_active %}Faol{% else %}Bloklangan{% endif %}
+                    </span>
+                </span>
+            </div>
+            <div class="flex items-center justify-between text-sm">
+                <span class="text-gray-500">Qo'shilgan:</span>
+                <span class="text-gray-700">
+                    {{ worker.created_at.strftime('%d.%m.%Y') }}
+                </span>
+            </div>
+        </div>
+
+        <!-- Huquqlar -->
+        <div class="bg-gray-50 rounded-xl p-3 mb-4">
+            <p class="text-xs font-medium text-gray-600 mb-2">
+                <i class="fas fa-key mr-1"></i> Huquqlar:
+            </p>
+            <div class="space-y-1">
+                <div class="flex items-center gap-2 text-xs text-gray-500">
+                    <i class="fas fa-check text-green-500 w-3"></i>
+                    Mijoz qo'shish
+                </div>
+                <div class="flex items-center gap-2 text-xs text-gray-500">
+                    <i class="fas fa-check text-green-500 w-3"></i>
+                    Qarz yozish
+                </div>
+                <div class="flex items-center gap-2 text-xs text-gray-500">
+                    <i class="fas fa-check text-green-500 w-3"></i>
+                    To'lov qabul qilish
+                </div>
+                <div class="flex items-center gap-2 text-xs text-gray-500">
+                    <i class="fas fa-times text-red-400 w-3"></i>
+                    Mijozni o'chirish (taqiqlangan)
+                </div>
+            </div>
+        </div>
+
+        <!-- O'chirish -->
+        <form method="POST"
+              action="{{ url_for('owner.delete_employee', user_id=worker.id) }}"
+              onsubmit="return confirm('{{ worker.full_name }}ni o\'chirmoqchimisiz?')">
+            <button type="submit"
+                    class="w-full bg-red-50 hover:bg-red-500 hover:text-white
+                           text-red-500 py-2 rounded-xl text-sm font-medium transition">
+                <i class="fas fa-trash mr-2"></i> O'chirish
+            </button>
+        </form>
+    </div>
+    {% endfor %}
+</div>
+
+{% else %}
+<div class="bg-white rounded-2xl shadow-sm p-16 text-center">
+    <div class="w-20 h-20 bg-gray-100 rounded-full flex items-center
+                justify-center mx-auto mb-4">
+        <i class="fas fa-user-tie text-gray-400 text-3xl"></i>
+    </div>
+    <h3 class="text-gray-600 font-semibold text-lg mb-2">
+        Hozircha ishchilar yo'q
+    </h3>
+    <p class="text-gray-400 text-sm mb-6">
+        Ishchi qo'shib, ularga login-parol bering
+    </p>
+    <a href="{{ url_for('owner.add_employee') }}"
+       class="inline-block bg-blue-600 hover:bg-blue-700 text-white
+              px-6 py-3 rounded-xl text-sm font-medium transition">
+        <i class="fas fa-user-plus mr-2"></i> Birinchi ishchini qo'shish
+    </a>
+</div>
+{% endif %}
+{% endblock %}

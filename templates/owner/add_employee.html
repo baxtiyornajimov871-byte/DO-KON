@@ -1,0 +1,182 @@
+{% extends "base.html" %}
+{% block title %}Ishchi qo'shish — Daftar.uz{% endblock %}
+
+{% block content %}
+<div class="mb-8 flex items-center justify-between">
+    <div>
+        <h1 class="text-2xl font-bold text-gray-800">Yangi ishchi qo'shish</h1>
+        <p class="text-gray-500 text-sm mt-1">Kassir uchun login va parol yarating</p>
+    </div>
+    <a href="{{ url_for('owner.employees') }}"
+       class="bg-gray-100 hover:bg-gray-200 text-gray-600 px-4 py-2 rounded-xl text-sm transition">
+        <i class="fas fa-arrow-left mr-2"></i> Orqaga
+    </a>
+</div>
+
+<div class="max-w-2xl">
+    <div class="bg-white rounded-2xl shadow-sm p-8">
+
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                <div class="mb-4 p-3 rounded-lg text-sm font-medium
+                    {% if category == 'success' %}bg-green-100 text-green-800
+                    {% elif category == 'danger' %}bg-red-100 text-red-800
+                    {% else %}bg-blue-100 text-blue-800{% endif %}">
+                    {{ message }}
+                </div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+
+        <!-- Huquqlar -->
+        <div class="bg-blue-50 border border-blue-100 rounded-xl p-4 mb-6">
+            <p class="text-blue-700 text-sm font-medium mb-3">
+                <i class="fas fa-info-circle mr-2"></i>
+                Kassir qila oladigan amallar:
+            </p>
+            <div class="grid grid-cols-2 gap-2">
+                <div class="flex items-center gap-2 text-sm text-gray-600">
+                    <i class="fas fa-check text-green-500"></i> Mijoz qo'shish
+                </div>
+                <div class="flex items-center gap-2 text-sm text-gray-600">
+                    <i class="fas fa-check text-green-500"></i> Qarz yozish
+                </div>
+                <div class="flex items-center gap-2 text-sm text-gray-600">
+                    <i class="fas fa-check text-green-500"></i> To'lov qabul qilish
+                </div>
+                <div class="flex items-center gap-2 text-sm text-gray-600">
+                    <i class="fas fa-check text-green-500"></i> Mijozlar ro'yxatini ko'rish
+                </div>
+                <div class="flex items-center gap-2 text-sm text-gray-600">
+                    <i class="fas fa-times text-red-400"></i> Mijozni o'chirish
+                </div>
+                <div class="flex items-center gap-2 text-sm text-gray-600">
+                    <i class="fas fa-times text-red-400"></i> Audit loglarni ko'rish
+                </div>
+            </div>
+        </div>
+
+        <form method="POST" action="{{ url_for('owner.add_employee') }}"
+              class="space-y-5">
+
+            <!-- To'liq ism -->
+            <div>
+                <label class="block text-gray-700 text-sm font-medium mb-2">
+                    <i class="fas fa-user mr-1 text-blue-500"></i>
+                    To'liq ism <span class="text-red-500">*</span>
+                </label>
+                <input type="text" name="full_name" required
+                       placeholder="Ishchining ismi familiyasi"
+                       class="w-full px-4 py-3 border border-gray-200 rounded-xl
+                              focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm">
+            </div>
+
+            <!-- Username -->
+            <div>
+                <label class="block text-gray-700 text-sm font-medium mb-2">
+                    <i class="fas fa-at mr-1 text-blue-500"></i>
+                    Username <span class="text-red-500">*</span>
+                </label>
+                <input type="text" name="username" required
+                       placeholder="kassir_ali"
+                       class="w-full px-4 py-3 border border-gray-200 rounded-xl
+                              focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm">
+                <p class="text-gray-400 text-xs mt-1">
+                    Faqat lotin harflari, raqamlar va _ belgisi
+                </p>
+            </div>
+
+            <!-- Parol -->
+            <div>
+                <label class="block text-gray-700 text-sm font-medium mb-2">
+                    <i class="fas fa-lock mr-1 text-blue-500"></i>
+                    Parol <span class="text-red-500">*</span>
+                </label>
+                <div class="relative">
+                    <input type="password" name="password" id="password"
+                           required placeholder="Kamida 6 ta belgi"
+                           class="w-full px-4 py-3 border border-gray-200 rounded-xl
+                                  focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm">
+                    <button type="button" onclick="togglePass()"
+                            class="absolute right-3 top-3 text-gray-400 hover:text-gray-600">
+                        <i class="fas fa-eye" id="eyeIcon"></i>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Parol generator -->
+            <div class="bg-gray-50 rounded-xl p-4">
+                <p class="text-sm text-gray-600 font-medium mb-2">
+                    <i class="fas fa-magic mr-1 text-purple-500"></i>
+                    Avtomatik parol yaratish:
+                </p>
+                <div class="flex gap-2">
+                    <input type="text" id="generatedPass" readonly
+                           placeholder="Bu yerda parol chiqadi..."
+                           class="flex-1 px-3 py-2 border border-gray-200 rounded-lg
+                                  text-sm bg-white text-gray-700">
+                    <button type="button" onclick="generatePassword()"
+                            class="bg-purple-500 hover:bg-purple-600 text-white
+                                   px-4 py-2 rounded-lg text-sm transition">
+                        Yaratish
+                    </button>
+                    <button type="button" onclick="usePassword()"
+                            class="bg-green-500 hover:bg-green-600 text-white
+                                   px-4 py-2 rounded-lg text-sm transition">
+                        Ishlatish
+                    </button>
+                </div>
+            </div>
+
+            <!-- Tugmalar -->
+            <div class="flex gap-3 pt-2">
+                <button type="submit"
+                        class="flex-1 bg-blue-600 hover:bg-blue-700 text-white
+                               font-semibold py-3 rounded-xl transition text-sm">
+                    <i class="fas fa-user-plus mr-2"></i> Ishchi qo'shish
+                </button>
+                <a href="{{ url_for('owner.employees') }}"
+                   class="flex-1 text-center bg-gray-100 hover:bg-gray-200
+                          text-gray-600 font-semibold py-3 rounded-xl transition text-sm">
+                    Bekor qilish
+                </a>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+function togglePass() {
+    const pwd = document.getElementById('password');
+    const icon = document.getElementById('eyeIcon');
+    if (pwd.type === 'password') {
+        pwd.type = 'text';
+        icon.classList.replace('fa-eye', 'fa-eye-slash');
+    } else {
+        pwd.type = 'password';
+        icon.classList.replace('fa-eye-slash', 'fa-eye');
+    }
+}
+
+function generatePassword() {
+    const chars = 'ABCDEFGHJKMNPQRSTUVWXYZabcdefghjkmnpqrstuvwxyz23456789';
+    let pass = '';
+    for (let i = 0; i < 8; i++) {
+        pass += chars.charAt(Math.floor(Math.random() * chars.length));
+    }
+    document.getElementById('generatedPass').value = pass;
+}
+
+function usePassword() {
+    const pass = document.getElementById('generatedPass').value;
+    if (pass) {
+        document.getElementById('password').value = pass;
+        document.getElementById('password').type = 'text';
+        document.getElementById('eyeIcon').classList.replace('fa-eye', 'fa-eye-slash');
+    }
+}
+</script>
+{% endblock %}

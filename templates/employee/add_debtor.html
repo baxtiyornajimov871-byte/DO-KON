@@ -1,0 +1,110 @@
+{% extends "base.html" %}
+{% block title %}Mijoz qo'shish — Daftar.uz{% endblock %}
+
+{% block content %}
+<div class="mb-8 flex items-center justify-between">
+    <div>
+        <h1 class="text-2xl font-bold text-gray-800">Yangi mijoz qo'shish</h1>
+        <p class="text-gray-500 text-sm mt-1">Mijoz ma'lumotlarini kiriting</p>
+    </div>
+    <a href="{{ url_for('employee.debtors') }}"
+       class="bg-gray-100 hover:bg-gray-200 text-gray-600 px-4 py-2 rounded-xl text-sm transition">
+        <i class="fas fa-arrow-left mr-2"></i> Orqaga
+    </a>
+</div>
+
+<div class="max-w-2xl">
+    <div class="bg-white rounded-2xl shadow-sm p-8">
+
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                <div class="mb-4 p-3 rounded-lg text-sm font-medium
+                    {% if category == 'success' %}bg-green-100 text-green-800
+                    {% elif category == 'danger' %}bg-red-100 text-red-800
+                    {% else %}bg-blue-100 text-blue-800{% endif %}">
+                    {{ message }}
+                </div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+
+        <!-- Kassir uchun eslatma -->
+        <div class="bg-blue-50 border border-blue-100 rounded-xl p-4 mb-6">
+            <p class="text-blue-700 text-sm font-medium mb-2">
+                <i class="fas fa-info-circle mr-2"></i>
+                Eslatma:
+            </p>
+            <div class="space-y-1">
+                <div class="flex items-center gap-2 text-sm text-blue-600">
+                    <i class="fas fa-check w-3"></i>
+                    Mijoz qo'shilgandan keyin unga qarz yozishingiz mumkin
+                </div>
+                <div class="flex items-center gap-2 text-sm text-blue-600">
+                    <i class="fas fa-check w-3"></i>
+                    Qarz limiti do'kon egasi tomonidan belgilanadi
+                </div>
+                <div class="flex items-center gap-2 text-sm text-red-500">
+                    <i class="fas fa-times w-3"></i>
+                    Qo'shilgan mijozni o'chira olmaysiz
+                </div>
+            </div>
+        </div>
+
+        <form method="POST" action="{{ url_for('employee.add_debtor') }}"
+              class="space-y-5">
+
+            <!-- To'liq ism -->
+            <div>
+                <label class="block text-gray-700 text-sm font-medium mb-2">
+                    <i class="fas fa-user mr-1 text-blue-500"></i>
+                    To'liq ism <span class="text-red-500">*</span>
+                </label>
+                <input type="text" name="full_name" required
+                       placeholder="Ism Familiya"
+                       class="w-full px-4 py-3 border border-gray-200 rounded-xl
+                              focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm">
+            </div>
+
+            <!-- Telefon -->
+            <div>
+                <label class="block text-gray-700 text-sm font-medium mb-2">
+                    <i class="fas fa-phone mr-1 text-blue-500"></i>
+                    Telefon raqam <span class="text-red-500">*</span>
+                </label>
+                <input type="text" name="phone" required
+                       placeholder="+998901234567"
+                       class="w-full px-4 py-3 border border-gray-200 rounded-xl
+                              focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm">
+            </div>
+
+            <!-- Izoh -->
+            <div>
+                <label class="block text-gray-700 text-sm font-medium mb-2">
+                    <i class="fas fa-comment mr-1 text-blue-500"></i>
+                    Izoh (ixtiyoriy)
+                </label>
+                <textarea name="notes" rows="3"
+                          placeholder="Mijoz haqida qo'shimcha ma'lumot..."
+                          class="w-full px-4 py-3 border border-gray-200 rounded-xl
+                                 focus:outline-none focus:ring-2 focus:ring-blue-500
+                                 text-sm resize-none"></textarea>
+            </div>
+
+            <!-- Tugmalar -->
+            <div class="flex gap-3 pt-2">
+                <button type="submit"
+                        class="flex-1 bg-blue-600 hover:bg-blue-700 text-white
+                               font-semibold py-3 rounded-xl transition text-sm">
+                    <i class="fas fa-user-plus mr-2"></i> Mijoz qo'shish
+                </button>
+                <a href="{{ url_for('employee.debtors') }}"
+                   class="flex-1 text-center bg-gray-100 hover:bg-gray-200
+                          text-gray-600 font-semibold py-3 rounded-xl transition text-sm">
+                    Bekor qilish
+                </a>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}
